@@ -17,6 +17,8 @@ from tools import get_weather, web_search, get_location_by_ip
 
 load_dotenv()
 
+GROQ_KEY = os.getenv("GROQ_API_KEY")
+
 
 # create state
 class State(TypedDict):
@@ -27,7 +29,7 @@ class State(TypedDict):
 llm = init_chat_model(
     model_provider="groq",
     model="openai/gpt-oss-120b",
-    api_key=os.getenv("GROQ_API_KEY"),
+    api_key=GROQ_KEY,
     temperature=1,
     reasoning_effort="low",
     stop=None,
