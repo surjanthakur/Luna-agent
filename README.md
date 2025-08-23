@@ -54,7 +54,7 @@ Summarize the solution (with light emojis for a human-like feel).
 
 # Clone the repo
 
-git clone https://github.com/<your-username>/luna-ai.git
+git clone https://github.com/surjanthakur/Luna-Ai.git
 cd luna-ai
 
 # Create virtual environment
