@@ -14,11 +14,11 @@ import os
 from dotenv import load_dotenv
 from system_prompt import system_prompt
 from tools import get_weather, web_search, get_location_by_ip
-from pymongo import MongoClient
 
 load_dotenv()
 
 GROQ_KEY = os.getenv("GROQ_API_KEY")
+MONGO_URL = os.getenv("MONGO_DB_URL")
 
 
 # create state
@@ -81,9 +81,7 @@ def run_graph(messages, chat_id):
 
     state = State({"messages": langchain_mesages})
 
-    DB_URL = os.getenv("MONGO_DB_URL")
-    client = MongoClient(DB_URL, serverSelectionTimeoutMS=5000)
-    print(client.server_info())
+    DB_URL = MONGO_URL
     config = RunnableConfig(configurable={"thread_id": chat_id})
     assistant_response = None
 
