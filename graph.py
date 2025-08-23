@@ -32,7 +32,7 @@ llm = init_chat_model(
     model="openai/gpt-oss-120b",
     api_key=GROQ_KEY,
     temperature=1,
-    reasoning_effort="medium",
+    reasoning_effort="low",
     stop=None,
 )
 tools = [get_weather, web_search, get_location_by_ip]
