@@ -1,0 +1,16 @@
+# Create .gitignore file
+echo "# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/" > .gitignore

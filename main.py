@@ -1,0 +1,224 @@
+import streamlit as st
+from PIL import Image
+from chat_functions import (
+    init_session_state,
+    create_new_chat,
+    load_chat,
+    save_current_chat,
+)
+from graph import run_graph
+
+# Page config
+st.set_page_config(
+    page_title="Luna Ai",
+    page_icon="🤖",
+    layout="wide",  # "centered" se "wide" kar diya
+    initial_sidebar_state="expanded",
+)
+
+# styling of page
+st.markdown(
+    """
+<style>
+/* Primary color (button, highlight) */
+.st-emotion-cache-ocqkz7 {
+  background-color: #3c3d37 !important;
+  color: #ffd700 !important;
+}
+
+/* Page background */
+.stApp {
+  background-color: #0e1117;
+}
+
+/* Sidebar background */
+section[data-testid="stSidebar"] {
+  background-color: #262730;
+}
+
+/* Text color */
+.stMarkdown,
+.stText,
+.css-10trblm {
+  color: white !important;
+}
+
+
+    .main-header {
+        text-align: center;
+        padding: 2rem 0;
+        border-bottom: 3px solid white;
+        margin-bottom: 2rem;
+        background-color: #3c3d37;
+        border-radius: 20px;
+        margin-top: 1rem;
+    }
+    
+    .main-header h3 {
+        color: #ffd700;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 4px 4px 10px rgba(255, 215, 0, 0.3);
+    }
+    
+    .main-header p {
+        color: #ffff;
+        font-size: 1.1rem;
+        font-weight: 400;
+    }
+
+.user-message {
+  max-width: max-content;
+  max-height: max-content;
+  padding: 1rem;
+  background-color: #3c3d37;
+  margin-left: auto;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+.assistant-message {
+  max-width: max-content;
+  max-height: max-content;
+  padding: 1rem;
+  background-color: #3c3d37;
+  margin-right: auto;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+strong {
+ color: #ffd700;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
+# display ui
+def main():
+    init_session_state()
+
+    with st.sidebar:
+        image = Image.open("images/luna_ai_logo_color_of_yellow.jpeg")
+        st.image(
+            image,
+            caption="luna ai",
+            width=50,
+        )
+
+        if st.button("➕ New Chat", use_container_width=True):
+            create_new_chat()
+            st.rerun()
+
+        st.markdown("<hr>", unsafe_allow_html=True)
+
+        if st.session_state.chat_history:
+            st.markdown("Chats")
+            for chat_id, chat_data in reversed(
+                list(st.session_state.chat_history.items())
+            ):
+                is_current = chat_id == st.session_state.current_chat_id
+
+                st.markdown('<div class="chat-item">', unsafe_allow_html=True)
+                col1, col2 = st.columns([4, 1])
+
+                with col1:
+                    if st.button(
+                        f"💭 {chat_data['title']}",
+                        key=f"chat_{chat_id}",
+                        use_container_width=True,
+                        type="primary" if is_current else "secondary",
+                    ):
+                        load_chat(chat_id)
+                        st.rerun()
+
+                with col2:
+                    st.markdown('<div class="delete-btn">', unsafe_allow_html=True)
+                    if st.button("🧹", key=f"delete_{chat_id}", help="Delete chat"):
+                        del st.session_state.chat_history[chat_id]
+                        if chat_id == st.session_state.current_chat_id:
+                            st.session_state.current_chat_id = None
+                            st.session_state.messages = []
+                        st.rerun()
+                    st.markdown("</div>", unsafe_allow_html=True)
+
+                st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            st.info("🎯 No chat history yet. Start a new conversation!")
+
+        # Sidebar footer
+        st.markdown("<hr>", unsafe_allow_html=True)
+        st.markdown(
+            """
+        <div style="text-align: center; color: #ffff; font-size: 0.8rem; margin-top: 2rem;">
+            <p>⚙️ available Tools</p>
+            <p>✅weather_info ✅web_search ✅general_info</p>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+    if st.session_state.messages == []:
+        st.markdown(
+            """
+    <div class="main-header">
+        <h3>👋 im Luna Ai Agent !</h3>
+        <p>I use tools to do cool things.</p>
+    </div>
+    """,
+            unsafe_allow_html=True,
+        )
+
+    # Create new chat if none exists
+    if not st.session_state.current_chat_id:
+        create_new_chat()
+
+    # Display chat messages with enhanced styling
+    chat_container = st.container()
+    with chat_container:
+        for message in st.session_state.messages:
+            if message["role"] == "user":
+                st.markdown(
+                    f"""
+                <div class="user-message">
+                    <strong>You: </strong>
+                    {message["content"]}
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    f"""
+                <div class="assistant-message">
+                    <strong>👧Luna: </strong>
+                    {message["content"]}
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
+    # Chat input
+    if prompt := st.chat_input("Ask Anything..."):
+        # Add user message
+        st.session_state.messages.append({"role": "user", "content": prompt})
+
+        with st.spinner("🤔 Thinking..."):
+            assistant_response = (
+                run_graph(st.session_state.messages, st.session_state.current_chat_id)
+                or None
+            )
+
+        if assistant_response:
+            st.session_state.messages.append(
+                {"role": "assistant", "content": assistant_response}
+            )
+
+        # Save current chat
+        save_current_chat()
+        st.rerun()
+
+
+main()
