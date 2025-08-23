@@ -14,11 +14,10 @@ import os
 from dotenv import load_dotenv
 from system_prompt import system_prompt
 from tools import get_weather, web_search, get_location_by_ip
-import streamlit as st
 
 load_dotenv()
 
-groq_key = st.secrets["GROQ_API_KEY"]
+GROQ_KEY = os.getenv("GROQ_API_KEY")
 
 
 # create state
@@ -30,7 +29,7 @@ class State(TypedDict):
 llm = init_chat_model(
     model_provider="groq",
     model="openai/gpt-oss-120b",
-    api_key=groq_key,
+    api_key=GROQ_KEY,
     temperature=1,
     reasoning_effort="low",
     stop=None,
