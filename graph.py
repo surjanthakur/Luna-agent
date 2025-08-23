@@ -19,7 +19,6 @@ import streamlit as st
 load_dotenv()
 
 GROQ_KEY = os.getenv("GROQ_API_KEY")
-MONGO_URL = os.getenv("MONGO_DB_URL")
 
 
 # create state
@@ -33,7 +32,7 @@ llm = init_chat_model(
     model="openai/gpt-oss-120b",
     api_key=GROQ_KEY,
     temperature=1,
-    reasoning_effort="low",
+    reasoning_effort="medium",
     stop=None,
 )
 tools = [get_weather, web_search, get_location_by_ip]
@@ -65,12 +64,6 @@ graph_builder.add_edge("chatbot", END)
 graph = graph_builder.compile()
 
 
-# add checkpointing using mongodb
-def compile_graph_checkpointing(checkpointer):
-    graph_checkpointing = graph_builder.compile(checkpointer=checkpointer)
-    return graph_checkpointing
-
-
 # stream graph
 def run_graph(messages, chat_id):
     langchain_mesages = []
@@ -82,20 +75,17 @@ def run_graph(messages, chat_id):
 
     state = State({"messages": langchain_mesages})
     try:
-        DB_URL = MONGO_URL
         config = RunnableConfig(configurable={"thread_id": chat_id})
         assistant_response = None
-        with MongoDBSaver.from_conn_string(DB_URL) as checkpointer:
-            mongo_graph = compile_graph_checkpointing(checkpointer)
-            for event in mongo_graph.stream(state, config=config, stream_mode="values"):
-                if "messages" in event and event["messages"]:
-                    last_message = event["messages"][-1]
-                if (
-                    hasattr(last_message, "content")
-                    and hasattr(last_message, "type")
-                    and last_message.type == "ai"
-                ):
-                    assistant_response = last_message.content
+        for event in graph.stream(state, config=config, stream_mode="values"):
+            if "messages" in event and event["messages"]:
+                last_message = event["messages"][-1]
+            if (
+                hasattr(last_message, "content")
+                and hasattr(last_message, "type")
+                and last_message.type == "ai"
+            ):
+                assistant_response = last_message.content
 
         return assistant_response
     except Exception:
