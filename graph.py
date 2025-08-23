@@ -14,6 +14,7 @@ import os
 from dotenv import load_dotenv
 from system_prompt import system_prompt
 from tools import get_weather, web_search, get_location_by_ip
+import streamlit as st
 
 load_dotenv()
 
@@ -80,16 +81,15 @@ def run_graph(messages, chat_id):
             langchain_mesages.append(AIMessage(content=msg["content"]))
 
     state = State({"messages": langchain_mesages})
-
-    DB_URL = MONGO_URL
-    config = RunnableConfig(configurable={"thread_id": chat_id})
-    assistant_response = None
-
-    with MongoDBSaver.from_conn_string(DB_URL) as checkpointer:
-        mongo_graph = compile_graph_checkpointing(checkpointer)
-        for event in mongo_graph.stream(state, config=config, stream_mode="values"):
-            if "messages" in event and event["messages"]:
-                last_message = event["messages"][-1]
+    try:
+        DB_URL = MONGO_URL
+        config = RunnableConfig(configurable={"thread_id": chat_id})
+        assistant_response = None
+        with MongoDBSaver.from_conn_string(DB_URL) as checkpointer:
+            mongo_graph = compile_graph_checkpointing(checkpointer)
+            for event in mongo_graph.stream(state, config=config, stream_mode="values"):
+                if "messages" in event and event["messages"]:
+                    last_message = event["messages"][-1]
                 if (
                     hasattr(last_message, "content")
                     and hasattr(last_message, "type")
@@ -97,4 +97,7 @@ def run_graph(messages, chat_id):
                 ):
                     assistant_response = last_message.content
 
-    return assistant_response
+        return assistant_response
+    except Exception:
+        st.error("Database connection failed. Please try again later.")
+        st.stop()
