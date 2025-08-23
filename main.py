@@ -206,10 +206,7 @@ def main():
         st.session_state.messages.append({"role": "user", "content": prompt})
 
         with st.spinner("🤔 Thinking..."):
-            assistant_response = (
-                run_graph(st.session_state.messages, st.session_state.current_chat_id)
-                or None
-            )
+            assistant_response = run_graph(st.session_state.messages) or None
 
         if assistant_response:
             st.session_state.messages.append(

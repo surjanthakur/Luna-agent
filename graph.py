@@ -65,7 +65,7 @@ graph = graph_builder.compile()
 
 
 # stream graph
-def run_graph(messages, chat_id):
+def run_graph(messages):
     langchain_mesages = []
     for msg in messages:
         if msg["role"] == "user":
@@ -74,20 +74,18 @@ def run_graph(messages, chat_id):
             langchain_mesages.append(AIMessage(content=msg["content"]))
 
     state = State({"messages": langchain_mesages})
-    try:
-        config = RunnableConfig(configurable={"thread_id": chat_id})
-        assistant_response = None
-        for event in graph.stream(state, config=config, stream_mode="values"):
-            if "messages" in event and event["messages"]:
-                last_message = event["messages"][-1]
-            if (
-                hasattr(last_message, "content")
-                and hasattr(last_message, "type")
-                and last_message.type == "ai"
-            ):
-                assistant_response = last_message.content
+    assistant_response = None
+    for event in graph.stream(state, stream_mode="values"):
+        if "messages" in event and event["messages"]:
+            last_message = event["messages"][-1]
+        if (
+            hasattr(last_message, "content")
+            and hasattr(last_message, "type")
+            and last_message.type == "ai"
+        ):
+            assistant_response = last_message.content
 
-        return assistant_response
-    except Exception:
-        st.error("Database connection failed. Please try again later.")
-        st.stop()
+    return assistant_response
+    # except Exception:
+    #     st.error("Database connection failed. Please try again later.")
+    #     st.stop()
