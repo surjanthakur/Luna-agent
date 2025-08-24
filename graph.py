@@ -71,8 +71,9 @@ def run_graph(messages):
             else:
                 langchain_mesages.append(AIMessage(content=msg["content"]))
 
-                state = State({"messages": langchain_mesages})
-            assistant_response = None
+        state = State({"messages": langchain_mesages})
+        assistant_response = None
+
         for event in graph.stream(state, stream_mode="values"):
             if "messages" in event and event["messages"]:
                 last_message = event["messages"][-1]
