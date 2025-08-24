@@ -29,10 +29,9 @@ class State(TypedDict):
 # call llm
 llm = init_chat_model(
     model_provider="groq",
-    model="openai/gpt-oss-120b",
+    model="moonshotai/kimi-k2-instruct",
     api_key=GROQ_KEY,
     temperature=1,
-    reasoning_effort="medium",
     stop=None,
 )
 tools = [get_weather, web_search, get_location_by_ip]
@@ -66,26 +65,27 @@ graph = graph_builder.compile()
 
 # stream graph
 def run_graph(messages):
-    langchain_mesages = []
-    for msg in messages:
-        if msg["role"] == "user":
-            langchain_mesages.append(HumanMessage(content=msg["content"]))
-        else:
-            langchain_mesages.append(AIMessage(content=msg["content"]))
+    try:
+        langchain_mesages = []
+        for msg in messages:
+            if msg["role"] == "user":
+                langchain_mesages.append(HumanMessage(content=msg["content"]))
+            else:
+                langchain_mesages.append(AIMessage(content=msg["content"]))
 
-    state = State({"messages": langchain_mesages})
-    assistant_response = None
-    for event in graph.stream(state, stream_mode="values"):
-        if "messages" in event and event["messages"]:
-            last_message = event["messages"][-1]
-        if (
-            hasattr(last_message, "content")
-            and hasattr(last_message, "type")
-            and last_message.type == "ai"
-        ):
-            assistant_response = last_message.content
+                state = State({"messages": langchain_mesages})
+            assistant_response = None
+        for event in graph.stream(state, stream_mode="values"):
+            if "messages" in event and event["messages"]:
+                last_message = event["messages"][-1]
+            if (
+                hasattr(last_message, "content")
+                and hasattr(last_message, "type")
+                and last_message.type == "ai"
+            ):
+                assistant_response = last_message.content
 
-    return assistant_response
-    # except Exception:
-    #     st.error("Database connection failed. Please try again later.")
-    #     st.stop()
+        return assistant_response
+    except Exception as e:
+        st.error(f"Something went Wrong {e} Please try again later.")
+        st.stop()
