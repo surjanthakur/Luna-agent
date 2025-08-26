@@ -39,24 +39,3 @@ def web_search(query: str):
         return "\n\n".join(informations[:5])  # Top 5 results
     except Exception as e:
         return f"Error performing web search: {str(e)}"
-
-
-@tool()
-def get_location_by_ip(ip: str):
-    """
-    Get approx location from IP address.
-    If no IP is given, auto-detects using 'ipinfo.io'.
-    """
-    try:
-        url = f"https://ipinfo.io/{ip}/json" if ip else "https://ipinfo.io/json"
-        res = requests.get(url)
-        data = res.json()
-        return {
-            "ip": data.get("ip"),
-            "city": data.get("city"),
-            "region": data.get("region"),
-            "country": data.get("country"),
-            "loc": data.get("loc"),  # latitude,longitude
-        }
-    except Exception as e:
-        return {"error": str(e)}
