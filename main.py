@@ -82,7 +82,6 @@ section[data-testid="stSidebar"] {
   max-width: max-content;
   max-height: max-content;
   padding: 1rem;
-  background-color: #3c3d37;
   margin-right: auto;
   border-radius: 20px;
   margin-bottom: 1rem;

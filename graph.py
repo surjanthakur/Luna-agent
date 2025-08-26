@@ -27,7 +27,7 @@ class State(TypedDict):
 # call llm
 llm = init_chat_model(
     model_provider="groq",
-    model="moonshotai/kimi-k2-instruct",
+    model="openai/gpt-oss-120b",
     api_key=GROQ_KEY,
     temperature=1,
     stop=None,

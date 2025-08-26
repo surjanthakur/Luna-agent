@@ -15,14 +15,15 @@ def get_weather(city: str):
         return f"Weather of {city} is {response.text}"
 
 
-@tool()
-def web_search(query: str):
-    """return the information from internet based on  query asked by user"""
+@tool
+def web_search(query: str) -> str:
+    """Return the information from internet based on query asked by user"""
+
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
         "q": query,
-        "key": os.getenv("GOOGLE_API_KEY"),
-        "cx": os.getenv("GOOGLE_SEARCH_ENGINE_ID"),
+        "key": os.getenv("GOOGLE_API_KEY"),  # apna Google API key
+        "cx": os.getenv("GOOGLE_SEARCH_ENGINE_ID"),  # apna CSE ID
     }
 
     try:
@@ -33,9 +34,9 @@ def web_search(query: str):
         if "items" in results:
             for item in results["items"]:
                 informations.append(
-                    f"{item['title']}: {item['link']}\n{item.get('snippet', '')}"
+                    f"{item['title']} - {item['link']}\n{item.get('snippet', '')}"
                 )
 
-        return "\n\n".join(informations[:5])  # Top 5 results
+        return "\n\n".join(informations[:5]) if informations else "No results found."
     except Exception as e:
         return f"Error performing web search: {str(e)}"
