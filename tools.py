@@ -1,7 +1,8 @@
 import requests
 from langchain_core.tools import tool
 from dotenv import load_dotenv
-import os, requests, webbrowser
+import os, requests
+import streamlit as st
 
 load_dotenv()
 
@@ -22,8 +23,8 @@ def web_search(query: str) -> str:
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
         "q": query,
-        "key": os.getenv("GOOGLE_API_KEY"),  # apna Google API key
-        "cx": os.getenv("GOOGLE_SEARCH_ENGINE_ID"),  # apna CSE ID
+        "key": os.getenv("GOOGLE_API_KEY"),  #  Google API key
+        "cx": os.getenv("GOOGLE_SEARCH_ENGINE_ID"),  # CSE ID
     }
 
     try:
@@ -62,4 +63,11 @@ def play_song(song_name: str):
 
     video_id = data["items"][0]["id"]["videoId"]
     video_url = f"https://www.youtube.com/watch?v={video_id}"
-    return webbrowser.open_new_tab(video_url)
+    open_window = f"""
+        <script>
+        window.open("{video_url}", "_blank").focus();
+        </script>
+        """
+    st.markdown(open_window, unsafe_allow_html=True)
+
+    return open_window
