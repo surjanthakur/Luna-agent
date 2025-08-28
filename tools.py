@@ -1,7 +1,7 @@
 import requests
 from langchain_core.tools import tool
 from dotenv import load_dotenv
-import os, requests
+import os, requests, webbrowser
 import streamlit as st
 
 load_dotenv()
@@ -62,12 +62,4 @@ def play_song(song_name: str):
         return "No song found."
 
     video_id = data["items"][0]["id"]["videoId"]
-    video_url = f"https://www.youtube.com/watch?v={video_id}"
-    open_window = f"""
-        <script>
-        window.open("{video_url}", "_blank").focus();
-        </script>
-        """
-    st.markdown(open_window, unsafe_allow_html=True)
-
-    return open_window
+    return st.video(f"https://www.youtube.com/watch?v={video_id}")
