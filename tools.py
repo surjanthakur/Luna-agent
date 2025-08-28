@@ -62,4 +62,5 @@ def play_song(song_name: str):
         return "No song found."
 
     video_id = data["items"][0]["id"]["videoId"]
-    return st.video(f"https://www.youtube.com/watch?v={video_id}")
+    st.video(f"https://www.youtube.com/watch?v={video_id}")
+    return f"https://www.youtube.com/watch?v={video_id}"
