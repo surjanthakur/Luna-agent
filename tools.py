@@ -1,7 +1,7 @@
 import requests
 from langchain_core.tools import tool
 from dotenv import load_dotenv
-import os
+import os, requests, webbrowser
 
 load_dotenv()
 
@@ -40,3 +40,26 @@ def web_search(query: str) -> str:
         return "\n\n".join(informations[:5]) if informations else "No results found."
     except Exception as e:
         return f"Error performing web search: {str(e)}"
+
+
+def play_song(song_name: str):
+    """Search YouTube for a song and return the video link to play song"""
+    url = "https://www.googleapis.com/youtube/v3/search"
+
+    params = {
+        "part": "snippet",
+        "q": song_name,
+        "type": "video",
+        "maxResults": 1,
+        "key": os.getenv("GOOGLE_API_KEY"),
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    if "items" not in data or len(data["items"]) == 0:
+        return "No song found."
+
+    video_id = data["items"][0]["id"]["videoId"]
+    video_url = f"https://www.youtube.com/watch?v={video_id}"
+    return webbrowser.open_new_tab(video_url)
