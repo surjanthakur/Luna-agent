@@ -2,7 +2,6 @@ import requests
 from langchain_core.tools import tool
 from dotenv import load_dotenv
 import os, requests, webbrowser
-import streamlit as st
 
 load_dotenv()
 
@@ -43,6 +42,7 @@ def web_search(query: str) -> str:
         return f"Error performing web search: {str(e)}"
 
 
+# this tool runs only locally on your machine
 def play_song(song_name: str):
     """Search YouTube for a song and return the video link to play song"""
     url = "https://www.googleapis.com/youtube/v3/search"
@@ -62,5 +62,5 @@ def play_song(song_name: str):
         return "No song found."
 
     video_id = data["items"][0]["id"]["videoId"]
-    st.video(f"https://www.youtube.com/watch?v={video_id}")
-    return f"https://www.youtube.com/watch?v={video_id}"
+    song_url = f"https://www.youtube.com/watch?v={video_id}"
+    return webbrowser.open_new_tab(song_url)
