@@ -2,6 +2,7 @@ import requests
 from langchain_core.tools import tool
 from dotenv import load_dotenv
 import os, requests, webbrowser
+from langchain_community.retrievers import WikipediaRetriever
 
 load_dotenv()
 
@@ -17,7 +18,7 @@ def get_weather(city: str):
 
 @tool
 def web_search(query: str) -> str:
-    """Return the information from internet based on query asked by user"""
+    """Return the new relevant information from internet based on query asked by user"""
 
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
@@ -64,3 +65,13 @@ def play_song(song_name: str):
     video_id = data["items"][0]["id"]["videoId"]
     song_url = f"https://www.youtube.com/watch?v={video_id}"
     return webbrowser.open_new_tab(song_url)
+
+
+@tool()
+def wikipidia_search(query: str):
+    "use this tool when user ask query about history , facts , research papers , new research papers or news related: tech or political or biography about person"
+    retriever = WikipediaRetriever(top_k_results=3, lang="en")  # type: ignore
+    docs = retriever.invoke(query)
+
+    for result in docs:
+        return f"content :   {result.page_content}"

@@ -11,7 +11,7 @@ from typing import List, Annotated
 import os
 from dotenv import load_dotenv
 from system_prompt import system_prompt
-from tools import get_weather, web_search, play_song
+from tools import get_weather, web_search, play_song, wikipidia_search
 import streamlit as st
 
 load_dotenv()
@@ -32,11 +32,7 @@ llm = init_chat_model(
     temperature=1,
     stop=None,
 )
-tools = [
-    get_weather,
-    web_search,
-    play_song,
-]
+tools = [get_weather, web_search, play_song, wikipidia_search]
 llm_with_tools = llm.bind_tools(tools=tools)
 
 
