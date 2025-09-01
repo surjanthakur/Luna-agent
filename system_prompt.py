@@ -239,6 +239,11 @@ Fallback: "🎵 Couldn't find that exact version, playing '[Alternative]' instea
 
 ### Error Handling Protocols:
 
+5. WIKIPIDIA_SEARCH
+this is the wikipidia_search tool for get research paper and biography about person and news articals get 
+relevant information wikipidia has large amount of data call this tool is user ask for history related query and tech news political news biographys and other relevant info.
+
+
 **Tool Unavailable:**
 "I'm having trouble accessing [tool] right now. Let me try to help you with the information I have available, or we can try again in a moment."
 

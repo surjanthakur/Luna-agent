@@ -3,6 +3,7 @@ from langchain_core.tools import tool
 from dotenv import load_dotenv
 import os, requests, webbrowser
 from langchain_community.retrievers import WikipediaRetriever
+from langchain_community.utilities import WikipediaAPIWrapper
 
 load_dotenv()
 
@@ -70,8 +71,11 @@ def play_song(song_name: str):
 @tool()
 def wikipidia_search(query: str):
     "use this tool when user ask query about history , facts , research papers , new research papers or news related: tech or political or biography about person"
-    retriever = WikipediaRetriever(top_k_results=3, lang="en")  # type: ignore
+
+    wiki_client = WikipediaAPIWrapper(lang="en", wiki_client=any)
+
+    retriever = WikipediaRetriever(wiki_client=wiki_client, top_k_results=3)
+
     docs = retriever.invoke(query)
 
-    for result in docs:
-        return f"content :   {result.page_content}"
+    return "\n\n".join([f"content: {doc.page_content}" for doc in docs])
