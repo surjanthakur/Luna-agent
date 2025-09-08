@@ -6,7 +6,11 @@ from chat_functions import (
     load_chat,
     save_current_chat,
 )
-from graph import run_graph
+from compile_graph import State, graph
+from langchain_core.runnables import RunnableConfig
+from langchain_core.messages import HumanMessage
+import uuid
+
 
 # Page config
 st.set_page_config(
@@ -16,7 +20,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# styling of page
+# Styling of page
 st.markdown(
     """
 <style>
@@ -43,30 +47,29 @@ section[data-testid="stSidebar"] {
   color: white !important;
 }
 
+.main-header {
+    text-align: center;
+    padding: 2rem 0;
+    border-bottom: 3px solid white;
+    margin-bottom: 2rem;
+    background-color: #3c3d37;
+    border-radius: 20px;
+    margin-top: 1rem;
+}
 
-    .main-header {
-        text-align: center;
-        padding: 2rem 0;
-        border-bottom: 3px solid white;
-        margin-bottom: 2rem;
-        background-color: #3c3d37;
-        border-radius: 20px;
-        margin-top: 1rem;
-    }
-    
-    .main-header h3 {
-        color: #ffd700;
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        text-shadow: 4px 4px 10px rgba(255, 215, 0, 0.3);
-    }
-    
-    .main-header p {
-        color: #ffff;
-        font-size: 1.1rem;
-        font-weight: 400;
-    }
+.main-header h3 {
+    color: #ffd700;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 4px 4px 10px rgba(255, 215, 0, 0.3);
+}
+
+.main-header p {
+    color: #ffff;
+    font-size: 1.1rem;
+    font-weight: 400;
+}
 
 .user-message {
   max-width: max-content;
@@ -96,17 +99,14 @@ strong {
 )
 
 
-# display ui
+# Display UI
 def main():
     init_session_state()
 
+    # Sidebar UI
     with st.sidebar:
         image = Image.open("images/luna_ai_logo_color_of_yellow.jpeg")
-        st.image(
-            image,
-            caption="luna ai",
-            width=50,
-        )
+        st.image(image, caption="luna ai", width=50)
 
         if st.button("➕ New Chat", use_container_width=True):
             create_new_chat()
@@ -116,6 +116,7 @@ def main():
 
         if st.session_state.chat_history:
             st.markdown("Chats")
+
             for chat_id, chat_data in reversed(
                 list(st.session_state.chat_history.items())
             ):
@@ -154,7 +155,7 @@ def main():
             """
         <div style="text-align: center; color: #ffff; font-size: 0.8rem; margin-top: 2rem;">
             <p>⚙️ available Tools</p>
-            <p>✅weather_info ✅web_search ✅general_info</p>
+            <p>✅ weather_info ✅ web_search ✅ general_info ✅ wikipidia search</p>
         </div>
         """,
             unsafe_allow_html=True,
@@ -163,11 +164,11 @@ def main():
     if st.session_state.messages == []:
         st.markdown(
             """
-    <div class="main-header">
-        <h3>👋 im Luna Ai Agent !</h3>
-        <p>I use tools to do cool things.</p>
-    </div>
-    """,
+        <div class="main-header">
+            <h3>👋 I'm Luna Ai Agent!</h3>
+            <p>I use tools to do cool things.</p>
+        </div>
+        """,
             unsafe_allow_html=True,
         )
 
@@ -175,46 +176,37 @@ def main():
     if not st.session_state.current_chat_id:
         create_new_chat()
 
-    # Display chat messages with enhanced styling
+    # Display chat messages
     chat_container = st.container()
     with chat_container:
         for message in st.session_state.messages:
-            if message["role"] == "user":
-                st.markdown(
-                    f"""
-                <div class="user-message">
-                    <strong>You: </strong>
-                    {message["content"]}
-                </div>
-                """,
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.markdown(
-                    f"""
-                <div class="assistant-message">
-                    <strong>👧Luna: </strong>
-                    {message["content"]}
-                </div>
-                """,
-                    unsafe_allow_html=True,
-                )
+            with st.chat_message(message["role"]):
+                st.text(message["content"])
+
     # Chat input
-    if prompt := st.chat_input("Ask Anything..."):
+    if prompt := st.chat_input("luna tell me.."):
         # Add user message
         st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.text(prompt)
 
         with st.spinner("🤔 Thinking..."):
-            assistant_response = run_graph(st.session_state.messages) or None
-
-        if assistant_response:
-            st.session_state.messages.append(
-                {"role": "assistant", "content": assistant_response}
+            config = RunnableConfig(configurable={"thread_id": uuid.uuid4()})
+            ai_response = st.write_stream(
+                token.content  # type: ignore
+                for token, metadata in graph.stream(
+                    {"messages": [HumanMessage(content=prompt)]},
+                    config=config,
+                    stream_mode="messages",
+                )
             )
+
+        st.session_state.messages.append({"role": "assistant", "content": ai_response})
 
         # Save current chat
         save_current_chat()
         st.rerun()
 
 
-main()
+if __name__ == "__main__":
+    main()

@@ -1,9 +1,11 @@
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.checkpoint.memory import InMemorySaver
 
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import SystemMessage
+
 
 from typing_extensions import TypedDict
 from typing import List, Annotated
@@ -39,7 +41,8 @@ llm_with_tools = llm.bind_tools(tools=tools)
 # create a chat route
 def chatbot(state: State):
     SYSTEM_PROMPT = system_prompt()
-    response = llm_with_tools.invoke([SystemMessage(SYSTEM_PROMPT)] + state["messages"])
+    messages = state["messages"]
+    response = llm_with_tools.invoke([SystemMessage(SYSTEM_PROMPT)] + messages)
     return {"messages": response}
 
 
@@ -58,33 +61,5 @@ graph_builder.add_edge("chatbot", END)
 
 
 # compiling graph
-graph = graph_builder.compile()
-
-
-# stream graph
-def run_graph(messages):
-    try:
-        langchain_mesages = []
-        for msg in messages:
-            if msg["role"] == "user":
-                langchain_mesages.append(HumanMessage(content=msg["content"]))
-            else:
-                langchain_mesages.append(AIMessage(content=msg["content"]))
-
-        state = State({"messages": langchain_mesages})
-        assistant_response = None
-
-        for event in graph.stream(state, stream_mode="values"):
-            if "messages" in event and event["messages"]:
-                last_message = event["messages"][-1]
-            if (
-                hasattr(last_message, "content")
-                and hasattr(last_message, "type")
-                and last_message.type == "ai"
-            ):
-                assistant_response = last_message.content
-
-        return assistant_response
-    except Exception as e:
-        st.error(f"Something went Wrong {e} Please try again later.")
-        st.stop()
+checkpointer = InMemorySaver()
+graph = graph_builder.compile(checkpointer=checkpointer)

@@ -16,13 +16,13 @@ def init_session_state():
 # create new chat
 def create_new_chat():
     chat_id = str(uuid.uuid4().hex[:5])
-    date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-    chat_title = f"chat at: {date_time}"
+    date_only = datetime.now().strftime("%Y-%m-%d")
+    chat_title = f"chat at: {date_only}"
 
     st.session_state.chat_history[chat_id] = {
         "title": chat_title,
         "messages": [],
-        "created_at": date_time,
+        "created_at": date_only,
     }
     st.session_state.current_chat_id = chat_id
     st.session_state.messages = []
