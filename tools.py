@@ -25,7 +25,7 @@ def web_search(query: str):
         web_search = DuckDuckGoSearchResults()
         result = web_search.invoke(query)
         return result
-    except Exception as e:
+    except:
         return "cant perform web search "
 
 
