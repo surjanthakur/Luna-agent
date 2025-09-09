@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
-from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.memory import MemorySaver
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage
@@ -61,5 +61,5 @@ graph_builder.add_edge("chatbot", END)
 
 
 # compiling graph
-checkpointer = InMemorySaver()
+checkpointer = MemorySaver()
 graph = graph_builder.compile(checkpointer=checkpointer)

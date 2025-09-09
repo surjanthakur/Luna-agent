@@ -9,7 +9,7 @@ from chat_functions import (
 from compile_graph import State, graph
 from langchain_core.runnables import RunnableConfig
 from langchain_core.messages import HumanMessage
-import uuid
+import time
 
 
 # Page config
@@ -190,8 +190,11 @@ def main():
         with st.chat_message("user"):
             st.text(prompt)
 
-        with st.spinner("🤔 Thinking..."):
-            config = RunnableConfig(configurable={"thread_id": uuid.uuid4()})
+        with st.spinner("🤔 Thinking...", show_time=True):
+            config = RunnableConfig(
+                configurable={"thread_id": st.session_state.current_chat_id},
+            )
+
             ai_response = st.write_stream(
                 token.content  # type: ignore
                 for token, metadata in graph.stream(
