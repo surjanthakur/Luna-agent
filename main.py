@@ -165,7 +165,7 @@ def main():
         st.markdown(
             """
         <div class="main-header">
-            <h3>👋 I'm Luna Ai Agent!</h3>
+            <h3>👋 I'm Luna Your Ai Agent!</h3>
             <p>I use tools to do cool things.</p>
         </div>
         """,
