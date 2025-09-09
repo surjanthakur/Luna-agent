@@ -6,9 +6,9 @@ from chat_functions import (
     load_chat,
     save_current_chat,
 )
-from compile_graph import State, graph
+from compile_graph import graph
 from langchain_core.runnables import RunnableConfig
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, ToolMessage, AIMessage
 import time
 
 
@@ -69,29 +69,6 @@ section[data-testid="stSidebar"] {
     color: #ffff;
     font-size: 1.1rem;
     font-weight: 400;
-}
-
-.user-message {
-  max-width: max-content;
-  max-height: max-content;
-  padding: 1rem;
-  background-color: #3c3d37;
-  margin-left: auto;
-  border-radius: 20px;
-  margin-bottom: 1rem;
-}
-
-.assistant-message {
-  max-width: max-content;
-  max-height: max-content;
-  padding: 1rem;
-  margin-right: auto;
-  border-radius: 20px;
-  margin-bottom: 1rem;
-}
-
-strong {
- color: #ffd700;
 }
 </style>
 """,
@@ -185,7 +162,6 @@ def main():
 
     # Chat input
     if prompt := st.chat_input("luna tell me.."):
-        # Add user message
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.text(prompt)
@@ -194,17 +170,40 @@ def main():
             config = RunnableConfig(
                 configurable={"thread_id": st.session_state.current_chat_id},
             )
+            # Use a mutable holder so the generator can set/modify it
+            status_holder = {"box": None}
 
-            ai_response = st.write_stream(
-                token.content  # type: ignore
-                for token, metadata in graph.stream(
+            def ai_only_stream():
+                for message_chunk, metadata in graph.stream(
                     {"messages": [HumanMessage(content=prompt)]},
                     config=config,
                     stream_mode="messages",
-                )
-            )
+                ):
+                    if isinstance(message_chunk, ToolMessage):
+                        tool_name = getattr(message_chunk, "name", "tool")
+                        if status_holder["box"] is None:
+                            status_holder["box"] = st.status(  # type: ignore
+                                f"🔧 tool calling :   {tool_name}"
+                            )
+                        else:
+                            status_holder["box"].update(
+                                label=f"🔧 Using `{tool_name}` …",
+                                state="running",
+                                expanded=True,
+                            )
+                    # Stream ONLY assistant tokens
+                    if isinstance(message_chunk, AIMessage):
+                        yield message_chunk.content
 
-        st.session_state.messages.append({"role": "assistant", "content": ai_response})
+            ai_message = st.write_stream(ai_only_stream())
+
+            # Finalize only if a tool was actually used
+            if status_holder["box"] is not None:
+                status_holder["box"].update(
+                    label="✅ Tool finished", state="complete", expanded=False
+                )
+
+        st.session_state.messages.append({"role": "assistant", "content": ai_message})
 
         # Save current chat
         save_current_chat()

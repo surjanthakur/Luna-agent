@@ -9,7 +9,7 @@ from langchain_community.tools import DuckDuckGoSearchResults
 load_dotenv()
 
 
-@tool()
+@tool
 def get_weather(city: str):
     """return the current weather info for a given city"""
     url = f"https://wttr.in/{city}?format=%C+%t"
@@ -29,7 +29,8 @@ def web_search(query: str):
         return "cant perform web search "
 
 
-# this tool runs only locally on your machine
+# this tool runs only locally on your machine . not ready for production ***********
+@tool
 def play_song(song_name: str):
     """Search YouTube for a song and return the video link to play song"""
     url = "https://www.googleapis.com/youtube/v3/search"
@@ -53,7 +54,7 @@ def play_song(song_name: str):
     return webbrowser.open_new_tab(song_url)
 
 
-@tool()
+@tool
 def wikipidia_search(query: str):
     "use this tool when user ask query about history , facts , research papers , new research papers or news related: tech or political or biography about person"
 
