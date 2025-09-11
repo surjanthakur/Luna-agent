@@ -70,6 +70,30 @@ section[data-testid="stSidebar"] {
     font-size: 1.1rem;
     font-weight: 400;
 }
+
+.user-message {
+  max-width: max-content;
+  max-height: max-content;
+  padding: 1rem;
+  background-color: #3c3d37;
+  margin-left: auto;
+  margin-top: 1rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+.assistant-message {
+  max-width: max-content;
+  max-height: max-content;
+  padding: 1rem;
+  margin-right: auto;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+strong {
+ color: #ffd700;
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -157,14 +181,30 @@ def main():
     chat_container = st.container()
     with chat_container:
         for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.text(message["content"])
+            if message["role"] == "user":
+                st.markdown(
+                    f"""
+              <div class="user-message">
+                    <strong>You: </strong>
+                    {message["content"]}
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    f"""
+              <div class="assistant-message">
+                    <strong>luna: </strong>
+                    {message["content"]}
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
 
     # Chat input
     if prompt := st.chat_input("luna tell me.."):
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.text(prompt)
 
         with st.spinner("🤔 Thinking...", show_time=True):
             config = RunnableConfig(
