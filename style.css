@@ -1,0 +1,70 @@
+/* Primary color (button, highlight) */
+.st-emotion-cache-ocqkz7 {
+  background-color: #3c3d37 !important;
+  color: #ffd700 !important;
+}
+
+/* Page background */
+.stApp {
+  background-color: #0e1117;
+}
+
+/* Sidebar background */
+section[data-testid="stSidebar"] {
+  background-color: #262730;
+}
+
+/* Text color */
+.stMarkdown,
+.stText,
+.css-10trblm {
+  color: white !important;
+}
+
+.main-header {
+  text-align: center;
+  padding: 2rem 0;
+  border-bottom: 3px solid white;
+  margin-bottom: 2rem;
+  background-color: #3c3d37;
+  border-radius: 20px;
+  margin-top: 1rem;
+}
+
+.main-header h3 {
+  color: #ffd700;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 4px 4px 10px rgba(255, 215, 0, 0.3);
+}
+
+.main-header p {
+  color: #ffff;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.user-message {
+  max-width: max-content;
+  max-height: max-content;
+  padding: 1rem;
+  background-color: #3c3d37;
+  margin-left: auto;
+  margin-top: 1rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+.assistant-message {
+  max-width: max-content;
+  max-height: max-content;
+  padding: 1rem;
+  margin-right: auto;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+strong {
+  color: #ffd700;
+}
