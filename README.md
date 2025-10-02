@@ -1,6 +1,6 @@
 🌙 Luna AI Agent
 
-Luna AI is a calm, problem-solving AI agent built by Surjan Thakur
+Luna AI is a calm, problem-solving AI agent built by Surjan Thakur.
 .
 Its mission is simple: understand user problems → plan smartly → solve using tools or knowledge.
 
