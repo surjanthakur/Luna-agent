@@ -32,8 +32,6 @@ Backend: Python
 
 AI Orchestration: LangGraph + LangChain
 
-Database: MongoDB (checkpointing)
-
 APIs: Custom tool integrations (Weather, Location, Web Search)
 
 🧭 How Luna Works
@@ -51,11 +49,6 @@ Execute with clarity: Step-by-step + highlighted key points.
 Summarize the solution (with light emojis for a human-like feel).
 
 ⚡ Installation & Setup
-
-# Clone the repo
-
-git clone https://github.com/surjanthakur/Luna-Ai.git
-cd luna-ai
 
 # Create virtual environment
 
